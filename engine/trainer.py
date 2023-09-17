@@ -79,9 +79,9 @@ def create_supervised_trainer_with_center(model, center_criterion, optimizer, op
         optimizer.zero_grad()
         optimizer_center.zero_grad()
         img, target = batch
-        img = img.to(device) if torch.cuda.device_count() >= 1 else img
+        img = img.to(device) if torch.cuda.device_count() >= 1 else img  # img.size = [Batchsize, height, width, channel]
         target = target.to(device) if torch.cuda.device_count() >= 1 else target
-        score, feat = model(img)
+        score, feat = model(img)                                         # score.size = [Batchsize, 751], feat.size = [Batchsize, 2048]
         loss = loss_fn(score, feat, target)
         # print("Total loss is {}, center loss is {}".format(loss, center_criterion(feat, target)))
         loss.backward()
@@ -91,7 +91,7 @@ def create_supervised_trainer_with_center(model, center_criterion, optimizer, op
         optimizer_center.step()
 
         # compute acc
-        acc = (score.max(1)[1] == target).float().mean()
+        acc = (score.max(1)[1] == target).float().mean()   # score.max(1)[1].size = [Batchsize], target.size = [Batchsize]
         return loss.item(), acc.item()
 
     return Engine(_update)
